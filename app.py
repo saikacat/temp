@@ -94,7 +94,8 @@ def upload():
     # Custom Params (refer to include/openpose/flags.hpp for more parameters)
     params = dict()
     params["model_folder"] = "/Users/timothy/openpose/models"
-
+    params["write_json"] = "../temp" 
+    params["keypoint_scale"] = "3"
     # Add others in path?
     for i in range(0, len(args[1])):
         curr_item = args[1][i]
@@ -118,6 +119,7 @@ def upload():
     print('here')
     print(args[0].image_path)
     # Process Image
+
     datum = op.Datum()
     imageToProcess = cv2.imread(args[0].image_path)
     datum.cvInputData = imageToProcess
@@ -130,9 +132,20 @@ def upload():
     outputName = 'poseSkeleton' + args[0].image_path 
     cv2.imwrite(outputName,datum.cvOutputData)
     cv2.waitKey(1)
+
+    bridge = {"version":1.3,"people":[{"person_id":[-1],"pose_keypoints_2d":[0.255244,0.603225,0.853665,0.3113,0.66861,0.611142,0.32568,0.706593,0.807634,0.426866,0.712084,0.641127,0.517195,0.717605,0.256783,0.302272,0.6304,0.369653,0,0,0,0,0,0,0.479215,0.510503,0.315729,0.475625,0.502358,0.327412,0.639993,0.447886,0.737408,0.632795,0.706738,0.700472,0.477412,0.521413,0.28034,0.632712,0.453244,0.332464,0.618279,0.665819,0.568486,0.239083,0.622133,0.949109,0.240877,0.603191,0.23209,0.242691,0.684896,0.808952,0,0,0,0.697774,0.733872,0.147229,0.701321,0.723011,0.143883,0.605658,0.684873,0.465871,0.697786,0.733884,0.716619,0.686923,0.739437,0.644811,0.623708,0.72306,0.68213],"face_keypoints_2d":[],"hand_left_keypoints_2d":[],"hand_right_keypoints_2d":[],"pose_keypoints_3d":[],"face_keypoints_3d":[],"hand_left_keypoints_3d":[],"hand_right_keypoints_3d":[]}]}
+
+   
+
+    fileNameForPhoto = '0' +'_keypoints.json'
+    with open(fileNameForPhoto) as f:
+        data = json.load(f)
+    print(data["people"][0]["pose_keypoints_2d"])
+    accuracy = comparePoints(1, data["people"][0]["pose_keypoints_2d"])
+# Output: {'name': 'Bob', 'languages': ['English', 'Fench']}
+    
     # assume data contains your decoded image
     encoded = base64.b64encode(open(outputName , "rb").read())
-    print(encoded)
         # Make prediction
         # preds = model_predict(file_path, model)
 
@@ -141,7 +154,8 @@ def upload():
         # pred_class = decode_predictions(preds, top=1)   # ImageNet Decode
         # result = str(pred_class[0][0][1])               # Convert to string
         # return result
-    return encoded
+    #return encoded
+    return json.dumps(accuracy)
 
 
 
@@ -185,7 +199,7 @@ def get_image():
 
 def comparePoints(index,pB):
 	points_2D_a = skeletonlib.poses[index]["people"][0]["pose_keypoints_2d"]
-	points_2D_b = pB["people"][0]["pose_keypoints_2d"]
+	points_2D_b = pB
 
 	pt = 1 # starting at x
 	avg = 0
@@ -211,6 +225,7 @@ def comparePoints(index,pB):
 
 	avg = avg/len(points_2D_a)
 	print((1-avg) * 100)
+
 
 if __name__ == '__main__':
     # app.run(port=5002, debug=True)
