@@ -1,0 +1,45 @@
+.counterContainer {
+  z-index: 999;
+  position: absolute;
+  top: 39vh;
+  right: 41.5%;
+}
+
+.status {
+  position: absolute;
+  bottom: 17%;
+  right: 38%;
+}
+
+.guestVideo {
+  background-color: #f2f1ef;
+}
+
+.userInfo {
+  position: absolute;
+  top: 3vh;
+  left: 4%;
+}
+
+.guestInfo {
+  position: absolute;
+
+  top: 56vh;
+  left: 4%;
+}
+
+.button {
+  z-index: 999;
+  padding: 11px;
+  outline: none;
+  background-color: #491a29;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  width: 100%;
+  height: 100%;
+}
+
+.relative {
+  position: relative;
+}
