@@ -8,10 +8,11 @@ import argparse
 import time
 import glob
 import re
-import numpy as np
 import cStringIO
-import PIL.Image
 import base64
+import skeletonlib
+import random
+import json 
 
 # Flask utils
 
@@ -142,10 +143,74 @@ def upload():
         # return result
     return encoded
 
+
+
+@app.route('/get_round_images_and_names')
+def get_round_images():
+    r = random.sample(range(1,14),4)
+    names = {}
+    for i in r:
+	names[i] = skeletonlib.poses_names[i]
+    j = json.dumps(names)
+    return j
+
+@app.route('/get_round_img', methods=['GET', 'POST'])
+def getPose():
+    if request.method == 'POST':
+        # Get the file from post request
+        f = request.files['file']
+	str(f)
+	print("getting round image")
+	print(f)
+	
+    # assume data contains your decoded image
+    encoded = base64.b64encode(open("poses/"+f+".jpg" , "rb").read())
+    print(encoded)
+        # Make prediction
+        # preds = model_predict(file_path, model)
+
+        # Process your result for human
+        # # pred_class = preds.argmax(axis=-1)            # Simple argmax
+        # pred_class = decode_predictions(preds, top=1)   # ImageNet Decode
+        # result = str(pred_class[0][0][1])               # Convert to string
+        # return result
+    return encoded
+
+
+
 @app.route('/get_image')
 def get_image():
     filename = 'uploads\\123.jpg'
     return send_file(filename, mimetype='image/jpg')
+
+def comparePoints(index,pB):
+	points_2D_a = skeletonlib.poses[index]["people"][0]["pose_keypoints_2d"]
+	points_2D_b = pB["people"][0]["pose_keypoints_2d"]
+
+	pt = 1 # starting at x
+	avg = 0
+
+	refHeadX = points_2D_a[0]
+	refHeadY = points_2D_a[1]
+
+	userHeadX = points_2D_b[0]
+	userHeadY = points_2D_b[1]
+	
+	for i in range(3, 75): # start at the next point.
+		if pt == 1: # x coord
+			refHeadDiff = refHeadX - points_2D_a[i]
+			userHeadDiff = userHeadX - points_2D_b[i]
+			avg = avg + abs(refHeadDiff - userHeadDiff)
+		if pt == 2: # y coord
+			refHeadDiff = refHeadY - points_2D_a[i]
+			userHeadDiff = userHeadY - points_2D_b[i]
+			avg = avg + abs(refHeadDiff - userHeadDiff)
+		if pt == 3: # confidence, it's not needed.
+			pt = 0
+		pt = pt+1	
+
+	avg = avg/len(points_2D_a)
+	print((1-avg) * 100)
 
 if __name__ == '__main__':
     # app.run(port=5002, debug=True)

@@ -62,5 +62,6 @@ function displayImage(image, id) {
   display.src = image;
   show(display);
 }
-    });
+});
+
 
